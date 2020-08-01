@@ -53,6 +53,10 @@ foreach($datas as $data){
     <button>clearData</button>
 </form>
 
+<form action="phpstuff/backToIndex.php">
+    <button>Back</button>
+</form>
+
 
 
 

@@ -9,7 +9,7 @@ $gameID = $_POST['game-ID'];
 
 session_start();
 $_SESSION['gameID'] = $gameID;
-$_SESSION['username'] = $username;
+$_SESSION['uid'] = $username;
 
 
 
@@ -23,7 +23,7 @@ $result = $stmt->get_result(); // get the mysqli result
 $row = $result->fetch_assoc(); // fetch data   
 
 if (mysqli_num_rows($result) == 0) { // GameID not created yet
-    header("location:../createPage.php?error=noGameID");
+    header("location:../index.php?error=noGameID");
     exit();
 } else {
     if (!($stmt = $conn->prepare("INSERT INTO Players(gameID, Username) VALUES (?, ?)"))) {

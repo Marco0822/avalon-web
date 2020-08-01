@@ -13,7 +13,7 @@ echo $gameID;
 
 session_start();
 $_SESSION['gameID'] = $gameID;
-$_SESSION['username'] = $username;
+$_SESSION['uid'] = $username;
 
 
 $sql = "SELECT * FROM Players WHERE gameID=?"; // SQL with parameters

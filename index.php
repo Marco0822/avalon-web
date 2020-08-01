@@ -30,17 +30,18 @@
 
 
 <?php
- 
+    
+    session_start();
 
-    if(isset($_GET['gameID'])) { 
-        $gameID = $_GET['gameID'];
+    if(isset($_SESSION['gameID'])) { 
+        $gameID = $_SESSION['gameID'];
         echo '<br>';
         echo "Game ID: ";
         echo $gameID;
         echo '<br>';
         
-        if(isset($_GET['uid'])) { 
-            $username = $_GET['uid'];
+        if(isset($_SESSION['uid'])) { 
+            $username = $_SESSION['uid'];
             echo "Your username: ";
             echo $username;
             echo '<br>';
@@ -68,7 +69,6 @@
                 $datas[] = $row;
             }
         }
-
         echo "<br>";
         echo "<br>";
         echo "Players: ";
@@ -88,13 +88,57 @@
         */
     }
 
+    $agree = "agree";
+    $disagree = "disagree";
+    $sql = "SELECT * FROM Players WHERE gameID=? OR gameID=?"; // SQL with parameters
+    $stmt = $conn->prepare($sql); 
+    $stmt->bind_param("ss", $agree, $disagree);
+    $stmt->execute();
+    $result = $stmt->get_result(); // get the mysqli result
+
+    if (mysqli_num_rows($result) > 0){ //There's data in the database
+        $noOfVotes = mysqli_num_rows($result);
+    } else {
+        $noOfVotes = "No votes yet!";
+    }
+
+    if(array_key_exists('voteBtn', $_POST)) { //if vote btn is pressed
+        $conn = new mysqli("localhost", "root", "", "avalonApp");
+        if ($conn->connect_errno) {
+            echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
+        }
+
+        global $gameID;
+        global $username;
+
+        $agree = "agree";
+        $disagree ="disagree";
+        $sql = "SELECT * FROM Players WHERE (gameID=? OR gameID=?) AND Username=?"; // SQL with parameters
+        $stmt = $conn->prepare($sql); 
+        $stmt->bind_param("sss", $agree, $disagree, $username);
+        $stmt->execute();
+        $result = $stmt->get_result(); // get the mysqli result
+        $row = $result->fetch_assoc(); // fetch data   
+
+        if (mysqli_num_rows($result) !== 0) { //If already voted
+            header("location:index.php?error=votedAlready");
+            exit();
+        } 
+        header("location:votePage.php");
+        exit();
+    } 
+
 ?>
 
 <br>
 <br>
-<form action="votePage.php">
-    <button>Vote</button>
-</form>
+
+<form method="post"> 
+    <input type="submit" name="voteBtn"
+    class="button" value="VOTE" /> 
+</form> 
+
+<label><?php echo "Votes: ".$noOfVotes; ?></label>
 
 <form action="resultPage.php">
     <button>See Results</button>
