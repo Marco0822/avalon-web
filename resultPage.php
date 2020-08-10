@@ -1,8 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "avalonApp");
-if ($conn->connect_errno) {
-    echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
-}
+require_once('phpstuff/connectDB.php');
 
 $agree = "agree";
 $sql = "SELECT * FROM Players WHERE gameID=?"; // SQL with parameters
