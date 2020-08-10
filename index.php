@@ -1,71 +1,37 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avalon Web</title>
-</head>
-<body>
-<!--
-    <div id="p1">Testing</div>
-    <div id="p2">Testing</div>
-    <div id="p3">Testing</div>
-    <div id="p4">Testing</div>
-    <div id="p5">Testing</div>
-    <div id="p6">Testing</div>
-    <div id="p7">Testing</div>
-    <div id="p8">Testing</div>
-    <div id="p9">Testing</div>
-    <div id="p10">Testing</div>
-    <br>
-    -->
-    
-<form action="createPage.php">
-    <button>Create GameID</button>
-</form>
-
-<form action="joinPage.php">
-    <button>Enter GameID</button>
-</form>
-
-
-
 <?php
     
     session_start();
 
-    if(isset($_SESSION['gameID'])) { 
+    //Echo global variable gameID
+    if(isset($_SESSION['gameID'])) {  
         $gameID = $_SESSION['gameID'];
-        echo '<br>';
-        echo "Game ID: ";
-        echo $gameID;
-        echo '<br>';
         
-        if(isset($_SESSION['uid'])) { 
+    //Echo global variable uid
+        if(isset($_SESSION['uid'])) {  
             $username = $_SESSION['uid'];
-            echo "Your username: ";
-            echo $username;
-            echo '<br>';
         }
 
-        $conn = new mysqli("localhost", "root", "", "avalonApp");
-        if ($conn->connect_errno) {
-            echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
-        }
+    //Connect to DB
 
+        require_once('phpstuff/connectDB.php'); 
 
-
-
-        $sql = "SELECT * FROM Players WHERE gameID=?"; // SQL with parameters
+        
+        // Select data with the same gameID
+        // Used for showing players with same gameID
+        $sql = "SELECT * FROM Players WHERE gameID=?"; 
         $stmt = $conn->prepare($sql); 
         $stmt->bind_param("s", $gameID);
         $stmt->execute();
-        $result = $stmt->get_result(); // get the mysqli result
+        $result = $stmt->get_result(); 
     
-
+        // $datas array will contain all rows with the same gameID
         $datas = array();
 
-        if (mysqli_num_rows($result) > 0){ //There's data in the database
-            while ($row = mysqli_fetch_assoc($result)){ //still havin rows to fetch
+        //There's data in the database
+        if (mysqli_num_rows($result) > 0){ 
+
+            //still havin rows to fetch
+            while ($row = mysqli_fetch_assoc($result)){ 
                 $datas[] = $row;
             }
         }
@@ -78,19 +44,13 @@
             echo "<br>";
             echo $data["Username"];
         }
-
-        //print_r($datas);
-
-        /*
-        $row = $result->fetch_assoc(); // fetch data   
-        echo "<br>Echoed Stuff: ";
-        echo $row["Username"];
-        */
     }
 
+    // Check if there's any votes
+    require_once('phpstuff/connectDB.php'); 
     $agree = "agree";
     $disagree = "disagree";
-    $sql = "SELECT * FROM Players WHERE gameID=? OR gameID=?"; // SQL with parameters
+    $sql = "SELECT * FROM Players WHERE gameID=? OR gameID=?"; 
     $stmt = $conn->prepare($sql); 
     $stmt->bind_param("ss", $agree, $disagree);
     $stmt->execute();
@@ -102,14 +62,11 @@
         $noOfVotes = "No votes yet!";
     }
 
-    if(array_key_exists('voteBtn', $_POST)) { //if vote btn is pressed
-        $conn = new mysqli("localhost", "root", "", "avalonApp");
-        if ($conn->connect_errno) {
-            echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
-        }
 
-        global $gameID;
-        global $username;
+
+    //if vote btn is pressed
+    if(array_key_exists('voteBtn', $_POST)) { 
+        require_once('phpstuff/connectDB.php');
 
         $agree = "agree";
         $disagree ="disagree";
@@ -119,19 +76,70 @@
         $stmt->execute();
         $result = $stmt->get_result(); // get the mysqli result
         $row = $result->fetch_assoc(); // fetch data   
+        $stmt->close();
 
-        if (mysqli_num_rows($result) !== 0) { //If already voted
+        //If voted already, throw error
+        if (mysqli_num_rows($result) !== 0) { 
             header("location:index.php?error=votedAlready");
             exit();
-        } 
-        header("location:votePage.php");
-        exit();
+        //Else, go to vote page 
+        } else {
+            header("location:votePage.php");
+            exit();
+        }
+       
     } 
+
+
+    //If log out button is pressed
+    if(array_key_exists('logOutBtn', $_POST)) { 
+
+    //Delete your own username from the database
+    $sql = "DELETE FROM Players WHERE gameID='$gameID' AND Username='$username'";
+    
+     if ($conn->query($sql) === TRUE) {
+       echo "Record deleted successfully";
+       $_SESSION['gameID'] = "null";
+       $_SESSION['uid'] = "null";
+       $_SESSION['logOutIsVisible'] = false;
+       header("Location:index.php");
+       exit();
+    
+     } else {
+       echo "Error deleting record: " . $conn->error;
+     }
+     
+     $conn->close();
+    
+    }
 
 ?>
 
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Avalon Web</title>
+</head>
+<body>
+
+    
 <br>
 <br>
+
+<!-- Game ID label-->
+<label><?php
+echo "Game ID: ".$gameID."<br>";
+?></label>
+
+<!-- Username label-->
+<label><?php
+echo "Username: ".$username."<br>";
+?></label>
+
+
 
 <form method="post"> 
     <input type="submit" name="voteBtn"
@@ -145,5 +153,44 @@
 </form>
 
 
+
+<?php
+
+$logOutIsVisible = $_SESSION['logOutIsVisible']; 
+
+//If log out button should be visible, for example if user is in game, 
+//make it so
+if (!($logOutIsVisible==false)){
+
+    //log Out button html HERE!!
+    echo '<form method="post">
+    <input type="submit" id="logOutBtnID" name="logOutBtn"
+    class="button" value="Log Out"/> 
+    </form>';
+} else {
+
+    // Log out button should be invisible, meaning create and enter button 
+    // should be visible
+
+    //create Game Button and join game button HERE
+    echo '<div id="header">
+
+    <form action="createPage.php">
+        <button>Create GameID</button>
+    </form>
+
+    <form action="joinPage.php">
+        <button>Enter GameID</button>
+    </form>
+
+    </div>';
+}
+
+    
+?>
+
+
 </body>
 </html>
+
+

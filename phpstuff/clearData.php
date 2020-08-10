@@ -1,8 +1,5 @@
 <?
- $conn = new mysqli("localhost", "root", "", "avalonApp");
- if ($conn->connect_errno) {
-     echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
- }
+ require_once('connectDB.php');
 
  $sql = "DELETE FROM Players WHERE gameID='agree' OR gameID='disagree'";
 
