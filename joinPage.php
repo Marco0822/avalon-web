@@ -8,11 +8,6 @@ if(array_key_exists('joinGameFunction',$_POST)){
     $username = $_POST['uid'];
     $gameID = $_POST['game-ID'];
 
-    echo $username;
-    echo '<br>';
-    echo $gameID;
-    echo "stuff";
-
     //Check if gameID name is created
     $sql = "SELECT * FROM Players WHERE gameID=?"; 
     $stmt = $conn->prepare($sql); 
@@ -22,8 +17,7 @@ if(array_key_exists('joinGameFunction',$_POST)){
 
     //If gameID has not been created yet
     if (mysqli_num_rows($result) == 0) { 
-        header("location:joinPage.php?error=gameIDNotCreated");
-        exit();
+        echo "GameID has not been created!";
     //Else if gameID has been created, insert gameID and username into table Players
     } else {
 
@@ -35,36 +29,38 @@ if(array_key_exists('joinGameFunction',$_POST)){
         $result = $stmt->get_result(); 
         //If username already taken
         if (mysqli_num_rows($result) !== 0) { 
-            header("location:joinPage.php?error=usernameTaken");
+            echo "That username has already been taken!";
+        } else {
+            
+            if (!($stmt = $conn->prepare("INSERT INTO Players(gameID, Username) VALUES (?, ?)"))) {
+                echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+            }
+            
+            
+            if (!$stmt->bind_param("ss", $gameID, $username)) {
+                echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+            }
+            
+            if (!$stmt->execute()) {
+                echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            }
+    
+            //Successfully entered gameId and username to database
+            session_start();
+    
+            //store gameID and usernameID as global variables
+            $_SESSION['gameID'] = $gameID;
+            $_SESSION['uid'] = $username;
+    
+            //log Out Btn should be visible after joined game successfully
+            $_SESSION['logOutIsVisible'] = true;
+    
+            $stmt->close();
+            header("location:index.php");
             exit();
         }
 
-        if (!($stmt = $conn->prepare("INSERT INTO Players(gameID, Username) VALUES (?, ?)"))) {
-            echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
-        }
         
-        
-        if (!$stmt->bind_param("ss", $gameID, $username)) {
-            echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
-        }
-        
-        if (!$stmt->execute()) {
-            echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
-        }
-
-        //Successfully entered gameId and username to database
-        session_start();
-
-        //store gameID and usernameID as global variables
-        $_SESSION['gameID'] = $gameID;
-        $_SESSION['uid'] = $username;
-
-        //log Out Btn should be visible after joined game successfully
-        $_SESSION['logOutIsVisible'] = true;
-
-        $stmt->close();
-        header("location:index.php");
-        exit();
     }
  }
 

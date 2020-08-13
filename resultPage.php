@@ -1,6 +1,7 @@
 <?php
 require_once('phpstuff/connectDB.php');
 
+
 $agree = "agree";
 $sql = "SELECT * FROM Players WHERE gameID=?"; // SQL with parameters
 $stmt = $conn->prepare($sql); 

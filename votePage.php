@@ -2,9 +2,22 @@
         $agreeOrNot = "don't know if agree";
 
         session_start();
-        $gameID = $_SESSION['gameID'];
-        $username = $_SESSION['uid'];
-        
+
+        if (isset($_SESSION['gameID'])){
+            $gameID = $_SESSION['gameID'];
+        } else {
+            header("Location:index.php?error=noGameID");
+            exit();
+        }
+
+        if (isset($_SESSION['uid'])){
+            $username = $_SESSION['uid'];
+        } else {
+            header("Location:index.php?error=noUid");
+            exit();
+        }
+
+
         if(array_key_exists('agree', $_POST)) { 
             checkIfVoted(); //not sure this works :(
             global $agreeOrNot;
