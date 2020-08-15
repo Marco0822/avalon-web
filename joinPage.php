@@ -118,49 +118,46 @@ if(array_key_exists('createGameFunction',$_POST)){
     //document.ready means the page is ready
         //meaning all elements of the html page is loaded
         $(document).ready(function() {  
-                // When button with id 'login' is clicked
-                $("#joinGameBtn").on('click', function(){
-                    //Get input stuff with id #email
-                    var JSgameID = $("#game-ID").val();
-                    var JSusername= $("#uid").val();
+            // When button with id 'login' is clicked
+            $("#joinGameBtn").on('click', function(){
+                //Get input stuff with id #email
+                var JSgameID = $("#game-ID").val();
+                var JSusername= $("#uid").val();
 
-                    //if empty fields
-                    if (JSgameID == "" || JSusername == ""){
-                        alert('Empty Field(s)! Check your inputs.');
-                    } else {
-                        $.ajax(
-                            {
-                                url: 'joinPage.php',
-                                method: 'POST',
-                                data: {
-                                    createGame: 1,
-                                    PHPgameID: JSgameID, 
-                                    PHPusername: JSusername
-                                },
-                                success: function(response) {
-                                    $("#response").html(response);
+                //if empty fields
+                if (JSgameID == "" || JSusername == ""){
+                    alert('Empty Field(s)! Check your inputs.');
+                } else {
+                    $.ajax({
+                        url: 'joinPage.php',
+                        method: 'POST',
+                        data: {
+                            createGame: 1,
+                            PHPgameID: JSgameID, 
+                            PHPusername: JSusername
+                        },
+                        success: function(response) {
+                            $("#response").html(response);
 
-                                    if (response == "Game ID has not been set!"){
-                                        alert("Game ID has not been set!");
+                            if (response == "Game ID has not been set!"){
+                                alert("Game ID has not been set!");
 
-                                    } else if (response == "Username has been taken!"){
-                                        alert("Username has been taken!"); 
+                            } else if (response == "Username has been taken!"){
+                                alert("Username has been taken!"); 
 
-                                    } else if (response == "Inserted data successfully!"){
-                                        window.location.href="index.php"; 
-                                    }
-                                },
-                                dataType: 'text'
+                            } else if (response == "Inserted data successfully!"){
+                                window.location.href="index.php"; 
                             }
-                        );
-                    }
+                        },
+                        dataType: 'text'
+                    });
+                }
 
-                })
+            })
             });
     
 </script>
 
-<p id="response">adsds</p>
 
 </body>
 </html>

@@ -1,5 +1,60 @@
 <?php
     
+
+//If Create Game button is pressed
+if (isset($_POST['createGame'])){
+
+    require_once('connectDB.php');
+
+    //get username and gameId from input
+    $username = $_POST['PHPusername'];
+    $gameID = $_POST['PHPgameID'];
+
+    //Check if desired gameID name is taken
+    $sql = "SELECT * FROM Players WHERE gameID=?"; 
+    $stmt = $conn->prepare($sql); 
+    $stmt->bind_param("s", $gameID);
+    $stmt->execute();
+    $result = $stmt->get_result();  
+
+    //If gameID is taken
+    if (mysqli_num_rows($result) !== 0) { 
+        exit("Game ID has already been taken");
+        
+    //Else try to insert gameID and username into table Players
+    } else {
+    
+        if (!($stmt = $conn->prepare("INSERT INTO Players(gameID, Username) VALUES (?, ?)"))) {
+            exit("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+        }
+        
+        
+        if (!$stmt->bind_param("ss", $gameID, $username)) {
+            exit("Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+        }
+        
+        if (!$stmt->execute()) {
+            exit("Execute failed: (" . $stmt->errno . ") " . $stmt->error);
+        }
+        //Successfully entered gameId and username to database
+        session_start();
+
+        //store gameID and usernameID as global variables
+        $_SESSION['gameID'] = $gameID;
+        $_SESSION['uid'] = $username;
+
+        //log Out Btn should be visible after created game successfully
+        $_SESSION['logOutIsVisible'] = true;
+
+        $stmt->close();
+        exit("Inserted data successfully!");
+    }
+}
+
+
+
+
+
     session_start();
 
 //function to pop up message box and show message
@@ -108,37 +163,8 @@
 
 
     //if vote btn is pressed
-    if(array_key_exists('voteBtn', $_POST)) { 
-        require_once('phpstuff/connectDB.php');
     
-       // Check if user has gameID
-        if ($gameID == "not yet set") {
-            global $error;
-            $error = "Unable to vote, create or enter game first!";
-        } else {
-            $agree = "agree";
-            $disagree ="disagree";
-            $sql = "SELECT * FROM Players WHERE (gameID=? OR gameID=?) AND Username=?"; // SQL with parameters
-            $stmt = $conn->prepare($sql); 
-            $stmt->bind_param("sss", $agree, $disagree, $username);
-            $stmt->execute();
-            $result = $stmt->get_result(); // get the mysqli result
-            $row = $result->fetch_assoc(); // fetch data   
-            $stmt->close();
-
-            //If voted already, throw error
-            if (mysqli_num_rows($result) !== 0) { 
-                $error = "votedAlready";
-                echoAlert("votedAlready");
-                
-            //Else, go to vote page 
-            } else {
-                header("location:votePage.php");
-                exit();
-            }
-        }
-       
-    } 
+    
 
 
     //If log out button is pressed
@@ -245,10 +271,8 @@ if (!($logOutIsVisible==false)){
 
     <label><?php echo "Votes: ".$noOfVotes; ?></label>
 
-    <form method="post"> 
-        <input type="submit" name="voteBtn"
-        class="button" value="VOTE" /> 
-    </form> 
+    
+    <button type="button" id="voteBtn">VOTE</button>
 
     <form action="resultPage.php">
         <button>See Results</button>
@@ -281,6 +305,52 @@ if (!($logOutIsVisible==false)){
 
  
 ?>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" 
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" 
+        crossorigin="anonymous">
+</script>
+
+<script type="text/javascript">
+    //document.ready means the page is ready
+        //meaning all elements of the html page is loaded
+        $(document).ready(function() {  
+            // When button with id 'login' is clicked
+            $("#voteBtn").on('click', function(){
+                //Get input stuff with id #email
+                var JSgameID = "<?php echo $gameID?>";
+                var JSusername= "<?php echo $username?>";
+
+                //if empty fields
+                if (JSgameID == "" || JSusername == ""){
+                    alert('Empty Field(s)! Check your inputs.');
+                } else {
+                    $.ajax({
+                            url: 'checkIfVoted.php',
+                            method: 'POST',
+                            dataType: 'text',
+                            data: {
+                                vote: 1,
+                                PHPgameID: JSgameID, 
+                                PHPusername: JSusername
+                            }
+                            
+                    }).done(function(returnedData){
+                        console.log(returnedData);
+                        if(returnedData == "not voted yet, can vote now"){
+                            //alert(returnedData);
+                            window.location.href="votePage.php"; 
+                        } else {
+                            alert(returnedData);
+                        }
+                    })
+                }
+
+            })
+        });
+    
+</script>
 
 
 </body>
