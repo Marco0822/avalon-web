@@ -140,7 +140,8 @@ if (isset($_POST['createGame'])){
 
         foreach($datas as $data){
             echo "<br>";
-            echo $data["Username"];
+            echo $data["Username"]."(";
+            echo $data['IdentityNo'].")";
         }
     }
 
@@ -206,6 +207,124 @@ if (isset($_POST['createGame'])){
     
 <br>
 <br>
+
+<?php
+
+require_once('phpstuff/connectDB.php'); 
+
+//Find your Character
+    $sql = "SELECT * FROM Players WHERE (gameID=? AND Username=?)"; 
+    $stmt = $conn->prepare($sql); 
+    $stmt->bind_param("ss", $gameID, $username);
+    $stmt->execute();
+    $result = $stmt->get_result(); // get the mysqli result
+
+    $yourCharArray = array();
+    $yourChar = "";
+
+    if (mysqli_num_rows($result) > 0){ //There's data in the database
+        //still havin rows to fetch
+        while ($row = mysqli_fetch_assoc($result)){ 
+            $yourCharArray[] = $row;
+        }
+        $yourChar = $yourCharArray[0]["IdentityNo"];
+        echo "yourChar:".$yourChar;
+    } 
+function labelPlayerBtn($buttonNo){
+    global $datas;
+    global $yourChar;
+    global $username;
+    if (isset($datas[$buttonNo]["Username"])){
+        $playerUsername = $datas[$buttonNo]["Username"];
+        echo $playerUsername."(";
+        $playerChar = $datas[$buttonNo]["IdentityNo"];
+
+        if ($playerChar == "merlin"){
+            if ($yourChar == "merlin" or $yourChar == "mushroom"){
+                echo "merlin)";
+            } else {
+                echo "unknown)";
+            }
+        }
+
+        if ($playerChar == "mushroom"){
+            if ($yourChar == "mushroom"){
+                echo "mushroom)";
+            } else {
+                echo "unknown)";
+            }
+        }
+
+        if ($playerChar == "villager"){
+            if ($playerUsername == $username){
+                echo "villager)";  
+            } else {
+                echo "unknown)";
+            }
+            
+        }
+
+        if ($playerChar == "minion"){
+            if ($yourChar == "minion" or $yourChar == "assassin" or $yourChar == "merlin"){
+                echo "minion)";
+            } else {
+                echo "unknown)";
+            }
+        }
+
+        if ($playerChar == "assassin"){
+            if ($yourChar == "minion" or $yourChar == "assassin" or $yourChar == "merlin"){
+                echo "assassin)";
+            } else {
+                echo "unknown)";
+            }
+        }
+
+    } else {
+        echo "not used yet";
+    }
+}
+?>
+
+<button id="player0"><?php
+labelPlayerBtn(0);
+?></button>
+
+<button id="player1"><?php
+labelPlayerBtn(1);
+?></button>
+
+<button id="player2"><?php
+labelPlayerBtn(2);
+?></button>
+
+<button id="player3"><?php
+labelPlayerBtn(3);
+?></button>
+
+<button id="player4"><?php
+labelPlayerBtn(4);
+?></button>
+
+<button id="player5"><?php
+labelPlayerBtn(5);
+?></button>
+
+<button id="player6"><?php
+labelPlayerBtn(6);
+?></button>
+
+<button id="player7"><?php
+labelPlayerBtn(7);
+?></button>
+
+<button id="player8"><?php
+labelPlayerBtn(8);
+?></button>
+
+<button id="player9"><?php
+labelPlayerBtn(9);
+?></button>
 
  <!-- Error Message Label-->
 <label id="errorMessageLabel"><?php 
