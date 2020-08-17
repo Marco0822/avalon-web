@@ -3,6 +3,8 @@
 
         session_start();
 
+        require_once("phpstuff/connectDB.php");
+
         if (isset($_SESSION['gameID'])){
             $gameID = $_SESSION['gameID'];
         } else {
@@ -32,13 +34,10 @@
         } 
 
         function checkIfVoted() {
-            $conn = new mysqli("localhost", "root", "", "avalonApp");
-            if ($conn->connect_errno) {
-                echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
-            }
 
             global $gameID;
             global $username;
+            global $conn;
 
             $agree = "agree";
             $disagree ="disagree";
@@ -58,10 +57,7 @@
             global $agreeOrNot;
             global $gameID;
             global $username;
-            $conn = new mysqli("localhost", "root", "", "avalonApp");
-            if ($conn->connect_errno) {
-                echo "Failed to connect to MySQL: (" . $conn->connect_errno . ") " . $conn->connect_error;
-            }
+            global $conn;
 
             if (!($stmt = $conn->prepare("INSERT INTO Players(gameID, Username) VALUES (?, ?)"))) {
                 echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;

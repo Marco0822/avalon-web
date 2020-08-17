@@ -1,5 +1,19 @@
 <?php
     
+include_once("phpstuff/connectDB.php");
+
+$createSql = "CREATE TABLE IF NOT EXISTS Players (
+                id INT(11) PRIMARY KEY AUTO_INCREMENT,
+                gameID VARCHAR(30),
+                Username VARCHAR(30),
+                IdentityNo VARCHAR(30)
+                )";
+$query = mysqli_query($conn, $createSql);
+if ($query === TRUE) {
+    echo "<h3>user table created OK :) </h3>"; 
+} else {
+    echo "<h3>user table NOT created :( </h3>"; 
+}
 
 //If Create Game button is pressed
 if (isset($_POST['createGame'])){
