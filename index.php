@@ -1,3 +1,14 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Avalon</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
 <?php
     
 include_once("phpstuff/connectDB.php");
@@ -9,11 +20,7 @@ $createSql = "CREATE TABLE IF NOT EXISTS Players (
                 IdentityNo VARCHAR(30)
                 )";
 $query = mysqli_query($conn, $createSql);
-if ($query === TRUE) {
-    echo "<h3>user table created OK :) </h3>"; 
-} else {
-    echo "<h3>user table NOT created :( </h3>"; 
-}
+
 
 //If Create Game button is pressed
 if (isset($_POST['createGame'])){
@@ -147,16 +154,7 @@ if (isset($_POST['createGame'])){
                 $datas[] = $row;
             }
         }
-        echo "<br>";
-        echo "<br>";
-        echo "Players: ";
-        echo "<br>";
 
-        foreach($datas as $data){
-            echo "<br>";
-            echo $data["Username"]."(";
-            echo $data['IdentityNo'].")";
-        }
     }
 
     // Check if there's any votes
@@ -206,23 +204,6 @@ if (isset($_POST['createGame'])){
     
     }
 
-?>
-
-
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Avalon Web</title>
-</head>
-<body>
-
-    
-<br>
-<br>
-
-<?php
 
 require_once('phpstuff/connectDB.php'); 
 
@@ -300,143 +281,124 @@ function labelPlayerBtn($buttonNo){
 }
 ?>
 
-<button id="player0"><?php
-labelPlayerBtn(0);
-?></button>
 
-<button id="player1"><?php
-labelPlayerBtn(1);
-?></button>
-
-<button id="player2"><?php
-labelPlayerBtn(2);
-?></button>
-
-<button id="player3"><?php
-labelPlayerBtn(3);
-?></button>
-
-<button id="player4"><?php
-labelPlayerBtn(4);
-?></button>
-
-<button id="player5"><?php
-labelPlayerBtn(5);
-?></button>
-
-<button id="player6"><?php
-labelPlayerBtn(6);
-?></button>
-
-<button id="player7"><?php
-labelPlayerBtn(7);
-?></button>
-
-<button id="player8"><?php
-labelPlayerBtn(8);
-?></button>
-
-<button id="player9"><?php
-labelPlayerBtn(9);
-?></button>
-
- <!-- Error Message Label-->
-<label id="errorMessageLabel"><?php 
-    echo "Error Message here: ".$error."<br>";
-?></label>
 
 <br>
 
-<!-- Game ID label-->
-<label id="gameIDLabel"><?php
+<div class="main-div">
 
-if (isset($gameID)){
-    echo "Game ID: ".$gameID."<br>";
-} else {
-    echo "Game ID: <br>";
-}
+<div class="header">
 
-?></label>
+    <h1>Avalon</h1>
+    <!-- Game ID label-->
+    <label id="gameIDLabel"><?php
 
-<!-- Username label-->
-<label><?php
-if (isset($username)){
-    echo "Username: ".$username."<br>";
-} else {
-    echo "Username: <br><br>";
-}
+    if (isset($gameID)){
+        echo "Game ID: ".$gameID."<br>";
+    } else {
+        echo "Game ID: <br>";
+    }
 
-?></label>
+    ?></label>
 
+    <!-- Username label-->
+    <label id="usernameLabel"><?php
+    if (isset($username)){
+        echo "Username: ".$username."<br>";
+    } else {
+        echo "Username: <br><br>";
+    }
+    ?></label>
+
+    <form action="createPage.php">
+        <button class="button" id="createBtn">Create GameID</button>
+    </form>
+
+    <form action="joinPage.php">
+        <button class="button" id="enterBtn">Enter GameID</button>
+    </form>
+    
+    <form method="post">
+        <button class="button" type="submit" 
+        name="logOutBtn" id="logOutBtnID">Log Out </button>
+    </form>
+</div>
+
+<div class="player-div">
+
+    <button id="playerLbl">Players:</button>
+
+    <button id="player0"><?php
+    labelPlayerBtn(0);
+    ?></button>
+
+    <button id="player1"><?php
+    labelPlayerBtn(1);
+    ?></button>
+
+    <button id="player2"><?php
+    labelPlayerBtn(2);
+    ?></button>
+
+    <button id="player3"><?php
+    labelPlayerBtn(3);
+    ?></button>
+
+    <button id="player4"><?php
+    labelPlayerBtn(4);
+    ?></button>
+
+    <button id="player5"><?php
+    labelPlayerBtn(5);
+    ?></button>
+
+    <button id="player6"><?php
+    labelPlayerBtn(6);
+    ?></button>
+
+    <button id="player7"><?php
+    labelPlayerBtn(7);
+    ?></button>
+
+    <button id="player8"><?php
+    labelPlayerBtn(8);
+    ?></button>
+
+    <button id="player9"><?php
+    labelPlayerBtn(9);
+    ?></button>
+
+    <div class="player-btm-div">
+        <form action="newGame.php">
+            <button id="newGameBtn" class="button">New Game</button>
+        </form>
+        <form action="resultPage.php">
+            <button id="seeResultBtn" class="button">See Results</button>
+        </form>
+
+        <button type="button" id="voteBtn" class="button">VOTE</button>
+        <label id="voteLabel"><?php echo "Votes: ".$noOfVotes; ?></label>
+        
+
+        
+    </div>
+
+</div>
+
+
+
+</div>
 
 
 
 <?php
-
-
 //Set $logOutIsVisible to false as default 
 //if $_SESSION['logOutIsVisible'] hasn't been set
 if (isset($_SESSION['logOutIsVisible'])){
     $logOutIsVisible = $_SESSION['logOutIsVisible']; 
 } else {
     $logOutIsVisible = false;
-   
 }
-
-
-//If log out button should be visible, for example if user is in game, 
-//make it so
-
-if (!($logOutIsVisible==false)){
-
-    //log Out button html HERE
-    // new game btn, votes label, vote btn, see results btn 
-    echo '
-    <form method="post">
-    <input type="submit" id="logOutBtnID" name="logOutBtn"
-    class="button" value="Log Out"/> 
-    </form>
-
-    <form action="newGame.php">
-    <button>New Game</button>
-    </form>
-
-
-    <label><?php echo "Votes: ".$noOfVotes; ?></label>
-
-    
-    <button type="button" id="voteBtn">VOTE</button>
-
-    <form action="resultPage.php">
-        <button>See Results</button>
-    </form>
-    
-    
-    ';
-} else {
-
-    // Log out button should be invisible, meaning create and enter button 
-    // should be visible
-
-    //create Game Button and join game button 
-    echo '
-    
-    <div id="header">
-
-    <form action="createPage.php">
-        <button>Create GameID</button>
-    </form>
-
-    <form action="joinPage.php">
-        <button>Enter GameID</button>
-    </form>
-
-    </div>
-    
-    ';
-}
-
- 
 ?>
 
 
@@ -448,7 +410,28 @@ if (!($logOutIsVisible==false)){
 <script type="text/javascript">
     //document.ready means the page is ready
         //meaning all elements of the html page is loaded
-        $(document).ready(function() {  
+        $(document).ready(function() { 
+
+            //Show or hide log out button and createGame and joinPage button
+            
+            logOutIsVisible = "<?php echo $logOutIsVisible?>";
+
+            if (logOutIsVisible == false){
+                //log Out button html HERE
+                // new game btn, votes label, vote btn, see results btn 
+                document.getElementById("logOutBtnID").style.display = "none";
+                document.getElementById("newGameBtn").style.display = "none";
+                document.getElementById("voteLabel").style.display = "none";
+                document.getElementById("voteBtn").style.display = "none";
+                document.getElementById("seeResultBtn").style.display = "none";
+
+            } else {
+                //echo createGame and joinGame button
+                document.getElementById("createBtn").style.display = "none";
+                document.getElementById("enterBtn").style.display = "none";
+            }
+
+
             // When button with id 'login' is clicked
             $("#voteBtn").on('click', function(){
                 //Get input stuff with id #email

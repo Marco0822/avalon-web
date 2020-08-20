@@ -1,5 +1,127 @@
-#header{
-    background-color: blue;
-    height: 10vh;
+
+
+* { 
+    background-color: grey;
+    margin: 0px;
+    color: black;
+    font-family: 'Josefin Sans', sans-serif;
+    background-color: white;
+}
+
+.header{
+    position: absolute;
+    top: 0px;
+    height: 60px;
     width: 100vw;
+    background-color :rgb(65, 87, 175);
+    
+}
+
+.header h1{
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    background-color: transparent;
+    color: white;
+}
+
+.header label{
+    background-color: transparent;
+    position: relative;
+    float: left;
+    margin-left: 10px;
+    top: 70%;
+    color: white;
+}
+
+
+
+.header form{
+    background-color: transparent;
+}
+
+.button{
+    background-color: rgb(53, 207, 207);
+    border:none;
+    border-radius: 7px;
+    color: white;
+}
+.header form button{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 45%;
+}
+
+#createBtn{
+    right: 130px;
+}
+
+#enterBtn{
+    right: 20px;
+}
+
+#logOutBtnID{
+    right: 20px;
+}
+
+#playerLbl{
+    background-color: rgb(255, 205, 54);
+}
+
+.player-div{
+    position: absolute;
+    top: 60px;
+    width: 200px;
+    bottom: 0px;
+    background-color: white;
+
+}
+
+.player-div button{
+    position: relative;
+    width: 100%;
+    height: 30px;
+    border:none;
+    
+}
+
+
+.player-div .player-btm-div{
+    background-color: white;
+   
+    height: 40%;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.player-div .player-btm-div label{
+    position: relative;
+    width: 100%;
+    height: 30px;
+    border-top: 2px solid rgb(255, 205, 54);
+    display: inline-block;
+    text-align: center;
+    line-height: 30px;
+}
+
+.player-div .player-btm-div button{
+    height: 30px;
+    margin-bottom: 5px;
+    width: 80%;
+    left: 50%;
+    -ms-transform: translate(-50%, 0%);
+    transform: translate(-50%, 0%);
+    
+   
+}
+
+.main-div{
+    background-color: rgb(247, 246, 246);
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    
 }
