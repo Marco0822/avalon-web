@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Just Avalon</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -17,7 +17,8 @@ $createSql = "CREATE TABLE IF NOT EXISTS Players (
                 id INT(11) PRIMARY KEY AUTO_INCREMENT,
                 gameID VARCHAR(30),
                 Username VARCHAR(30),
-                IdentityNo VARCHAR(30)
+                IdentityNo VARCHAR(30),
+                IsVoted VARCHAR(20)
                 )";
 $query = mysqli_query($conn, $createSql);
 
@@ -161,9 +162,11 @@ if (isset($_POST['createGame'])){
     require_once('phpstuff/connectDB.php'); 
     $agree = "agree";
     $disagree = "disagree";
-    $sql = "SELECT * FROM Players WHERE gameID=? OR gameID=?"; 
+    $agree_hide = "agree_hide";
+    $disagree_hide = "disagree_hide";
+    $sql = "SELECT * FROM Players WHERE gameID=? AND (IsVoted=? OR IsVoted=? OR IsVoted=? OR IsVoted=?)"; 
     $stmt = $conn->prepare($sql); 
-    $stmt->bind_param("ss", $agree, $disagree);
+    $stmt->bind_param("sssss", $gameID, $agree, $disagree, $agree_hide, $disagree_hide);
     $stmt->execute();
     $result = $stmt->get_result(); // get the mysqli result
 
@@ -182,7 +185,6 @@ if (isset($_POST['createGame'])){
 
     //If log out button is pressed
     if(array_key_exists('logOutBtn', $_POST)) { 
-
     //Delete your own username from the database
     //Problem is that it deletes not only the user, but another user
     //with the same username with a different gameID
@@ -231,52 +233,51 @@ function labelPlayerBtn($buttonNo){
     global $username;
     if (isset($datas[$buttonNo]["Username"])){
         $playerUsername = $datas[$buttonNo]["Username"];
-        echo $playerUsername."(";
+        echo $playerUsername;
         $playerChar = $datas[$buttonNo]["IdentityNo"];
 
         if ($playerChar == "merlin"){
             if ($yourChar == "merlin" or $yourChar == "mushroom"){
-                echo "merlin)";
+                echo "(merlin)";
             } else {
-                echo "unknown)";
+                echo "(unknown)";
             }
         }
 
         if ($playerChar == "mushroom"){
             if ($yourChar == "mushroom"){
-                echo "mushroom)";
+                echo "(mushroom)";
             } else {
-                echo "unknown)";
+                echo "(unknown)";
             }
         }
 
         if ($playerChar == "villager"){
             if ($playerUsername == $username){
-                echo "villager)";  
+                echo "(villager)";  
             } else {
-                echo "unknown)";
+                echo "(unknown)";
             }
             
         }
-
         if ($playerChar == "minion"){
             if ($yourChar == "minion" or $yourChar == "assassin" or $yourChar == "merlin"){
-                echo "minion)";
+                echo "(minion)";
             } else {
-                echo "unknown)";
+                echo "(unknown)";
             }
         }
 
         if ($playerChar == "assassin"){
             if ($yourChar == "minion" or $yourChar == "assassin" or $yourChar == "merlin"){
-                echo "assassin)";
+                echo "(assassin)";
             } else {
-                echo "unknown)";
+                echo "(unknown)";
             }
         }
 
     } else {
-        echo "not used yet";
+        echo "";
     }
 }
 ?>
@@ -287,103 +288,103 @@ function labelPlayerBtn($buttonNo){
 
 <div class="main-div">
 
-<div class="header">
+    <div class="header">
 
-    <h1>Avalon</h1>
-    <!-- Game ID label-->
-    <label id="gameIDLabel"><?php
+        <h1>Avalon</h1>
+        <!-- Game ID label-->
+        <label id="gameIDLabel"><?php
 
-    if (isset($gameID)){
-        echo "Game ID: ".$gameID."<br>";
-    } else {
-        echo "Game ID: <br>";
-    }
+        if (isset($gameID)){
+            echo "Game ID: ".$gameID."<br>";
+        } else {
+            echo "Game ID: <br>";
+        }
 
-    ?></label>
+        ?></label>
 
-    <!-- Username label-->
-    <label id="usernameLabel"><?php
-    if (isset($username)){
-        echo "Username: ".$username."<br>";
-    } else {
-        echo "Username: <br><br>";
-    }
-    ?></label>
+        <!-- Username label-->
+        <label id="usernameLabel"><?php
+        if (isset($username)){
+            echo "Username: ".$username."<br>";
+        } else {
+            echo "Username: <br><br>";
+        }
+        ?></label>
 
-    <form action="createPage.php">
-        <button class="button" id="createBtn">Create GameID</button>
-    </form>
-
-    <form action="joinPage.php">
-        <button class="button" id="enterBtn">Enter GameID</button>
-    </form>
-    
-    <form method="post">
-        <button class="button" type="submit" 
-        name="logOutBtn" id="logOutBtnID">Log Out </button>
-    </form>
-</div>
-
-<div class="player-div">
-
-    <button id="playerLbl">Players:</button>
-
-    <button id="player0"><?php
-    labelPlayerBtn(0);
-    ?></button>
-
-    <button id="player1"><?php
-    labelPlayerBtn(1);
-    ?></button>
-
-    <button id="player2"><?php
-    labelPlayerBtn(2);
-    ?></button>
-
-    <button id="player3"><?php
-    labelPlayerBtn(3);
-    ?></button>
-
-    <button id="player4"><?php
-    labelPlayerBtn(4);
-    ?></button>
-
-    <button id="player5"><?php
-    labelPlayerBtn(5);
-    ?></button>
-
-    <button id="player6"><?php
-    labelPlayerBtn(6);
-    ?></button>
-
-    <button id="player7"><?php
-    labelPlayerBtn(7);
-    ?></button>
-
-    <button id="player8"><?php
-    labelPlayerBtn(8);
-    ?></button>
-
-    <button id="player9"><?php
-    labelPlayerBtn(9);
-    ?></button>
-
-    <div class="player-btm-div">
-        <form action="newGame.php">
-            <button id="newGameBtn" class="button">New Game</button>
-        </form>
-        <form action="resultPage.php">
-            <button id="seeResultBtn" class="button">See Results</button>
+        <form action="createPage.php">
+            <button class="button" id="createBtn">Create GameID</button>
         </form>
 
-        <button type="button" id="voteBtn" class="button">VOTE</button>
-        <label id="voteLabel"><?php echo "Votes: ".$noOfVotes; ?></label>
+        <form action="joinPage.php">
+            <button class="button" id="enterBtn">Enter GameID</button>
+        </form>
         
-
-        
+        <form method="post">
+            <button class="button" type="submit" 
+            name="logOutBtn" id="logOutBtnID">Log Out </button>
+        </form>
     </div>
 
-</div>
+    <div class="player-div">
+
+        <button id="playerLbl">Players:</button>
+
+        <button id="player0"><?php
+        labelPlayerBtn(0);
+        ?></button>
+
+        <button id="player1"><?php
+        labelPlayerBtn(1);
+        ?></button>
+
+        <button id="player2"><?php
+        labelPlayerBtn(2);
+        ?></button>
+
+        <button id="player3"><?php
+        labelPlayerBtn(3);
+        ?></button>
+
+        <button id="player4"><?php
+        labelPlayerBtn(4);
+        ?></button>
+
+        <button id="player5"><?php
+        labelPlayerBtn(5);
+        ?></button>
+
+        <button id="player6"><?php
+        labelPlayerBtn(6);
+        ?></button>
+
+        <button id="player7"><?php
+        labelPlayerBtn(7);
+        ?></button>
+
+        <button id="player8"><?php
+        labelPlayerBtn(8);
+        ?></button>
+
+        <button id="player9"><?php
+        labelPlayerBtn(9);
+        ?></button>
+
+        <div class="player-btm-div">
+            <form action="newGame.php">
+                <button id="newGameBtn" class="button">New Game</button>
+            </form>
+            <form action="resultPage.php">
+                <button id="seeResultBtn" class="button">See Results</button>
+            </form>
+
+            <button type="button" id="voteBtn" class="button">VOTE</button>
+            <label id="voteLabel"><?php echo "Votes: ".$noOfVotes; ?></label>
+            
+
+            
+        </div>
+
+    </div>
 
 
 

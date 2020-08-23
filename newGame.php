@@ -1,9 +1,27 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Avalon</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500;700&display=swap" rel="stylesheet">
+</head>
+
 <?php
-    /*//Not allow user to start new game if no gameID
-    if (!isset($_SESSION['gameID'])){
-        header("Location:index.php?error=cannotStartGame");
-        exit();
-    }*/
+    //Successfully entered gameId and username to database
+    session_start();
+
+
+    //Echo global variable gameID
+    if(isset($_SESSION['gameID'])) {  
+        $gameID = $_SESSION['gameID'];
+    }
+    //Echo global variable uid
+    if(isset($_SESSION['uid'])) {  
+        $username = $_SESSION['uid'];
+    }
+
+
 ?>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" 
@@ -85,16 +103,57 @@ function backToIndex(){
 
 </script>
 
+<div class="header">
+<h1>Avalon</h1>
+
+<!-- Game ID label-->
+<label id="gameIDLabel"><?php
+
+if (isset($gameID)){
+    echo "Game ID: ".$gameID."<br>";
+} else {
+    echo "Game ID: <br>";
+}
+
+?></label>
+
+<!-- Username label-->
+<label id="usernameLabel"><?php
+if (isset($username)){
+    echo "Username: ".$username."<br>";
+} else {
+    echo "Username: <br><br>";
+}
+?></label>
+
+
+</div>
+
+<div class="body-div">
+
+<!-- These 2 h2 tags are hidden by css-->
 <h2 id="demo">Testing</h2>
 <h2 id="shuffle">Shuffled</h2>
 
-<input type="number" placeholder="Mushroom Number" id="mushroomNo">
-<input type="number" placeholder="Merlin Number" id="merlinNo">
-<input type="number" placeholder="Villager Number" id="villagerNo">
-<input type="number" placeholder="Minion Number" id="minionNo">
-<input type="number" placeholder="Assassin Number" id="assassinNo">
+
+<div class="input-container">
+    <input class="inputs" type="number" placeholder="Mushroom Number" id="mushroomNo">
+    <input class="inputs" type="number" placeholder="Merlin Number" id="merlinNo">
+    <input class="inputs" type="number" placeholder="Villager Number" id="villagerNo">
+    <input class="inputs" type="number" placeholder="Minion Number" id="minionNo">
+    <input class="inputs" type="number" placeholder="Assassin Number" id="assassinNo">
+</div>
 
 <br><br>
 
-<button id="newArrayBtn">Make New Array</button>
-<button onclick="backToIndex()">Back</button>
+<div class="btn-container">
+
+    <button id="newArrayBtn" class="button">Make New Array</button>
+    <button onclick="backToIndex()" class="button">Back</button>
+
+</div>
+
+
+
+
+</div>

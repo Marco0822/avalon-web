@@ -1,3 +1,12 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Avalon</title>
+    <link rel="stylesheet" href="styles/votePageStyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500;700&display=swap" rel="stylesheet">
+</head>
+
 <?php
         $agreeOrNot = "don't know if agree";
 
@@ -38,51 +47,65 @@
             global $gameID;
             global $username;
             global $conn;
+            $isVoted = "";
 
             $agree = "agree";
             $disagree ="disagree";
-            $sql = "SELECT * FROM Players WHERE (gameID=? OR gameID=?) AND Username=?"; // SQL with parameters
+            $sql = "SELECT IsVoted FROM Players WHERE gameID=? AND Username=?"; // SQL with parameters
             $stmt = $conn->prepare($sql); 
-            $stmt->bind_param("sss", $agree, $disagree, $username);
+            $stmt->bind_param("ss", $gameID, $username);
             $stmt->execute();
-            $result = $stmt->get_result(); // get the mysqli result
-            $row = $result->fetch_assoc(); // fetch data   
+            $result = $stmt->get_result(); // get the mysqli result  
 
-            if (mysqli_num_rows($result) !== 0) { //If already voted
+            while ($row = $result->fetch_row()) {
+                $isVoted = $row[0];
+            }
+
+            if ($isVoted == "yes") { //If already voted
                 header("location:index.php?error=votedAlready");
                 exit();
             } 
         }
-        function voteToDB() { 
-            global $agreeOrNot;
-            global $gameID;
-            global $username;
-            global $conn;
+            function voteToDB() { 
+                global $agreeOrNot;
+                global $gameID;
+                global $username;
+                global $conn;
 
-            if (!($stmt = $conn->prepare("INSERT INTO Players(gameID, Username) VALUES (?, ?)"))) {
-                echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
-            }
-            
-            if (!$stmt->bind_param("ss", $agreeOrNot, $username)) {
-                echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
-            }
-            
-            if (!$stmt->execute()) {
-                echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
-            }
+            if(!(isset($_POST['showName']))){ //If checkbox is not ticked
+                $agreeOrNot .= "_hide";
+            } 
 
-            echo "Inserted ".$agreeOrNot;
+            $sql = "UPDATE Players SET IsVoted=? WHERE gameID=? AND Username=?";
+            $stmt = $conn->prepare($sql); 
+            $stmt->bind_param("sss", $agreeOrNot, $gameID, $username);
+            $stmt->execute();
             
+
+            echo "<br>".$agreeOrNot;
+            echo "<br>".$gameID;
             $stmt->close();
-            header("location:index.php");
+            $conn->close();
+
+            header("Location: index.php");
             exit();
+
+            
+            
         } 
     ?> 
   
-    <form method="post"> 
-        <input type="submit" name="agree"
-                class="button" value="AGREE" /> 
-          
-        <input type="submit" name="disagree"
-                class="button" value="DISAGREE" /> 
+    <form method="post" class="body"> 
+
+        <div class="btn-div">
+            <button type="submit" name="agree" class="button">AGREE</button>
+            
+            <button type="submit" name="disagree" class="button">DISAGREE</button>
+        </div>
+        
+        <div class="checkbox-div">
+            <input type="checkbox" name="showName" id="showName">
+            <label for="">Show Name in Vote</label>
+        </div>
+        
     </form> 

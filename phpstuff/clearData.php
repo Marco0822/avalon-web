@@ -1,16 +1,28 @@
 <?
  require_once('connectDB.php');
 
- $sql = "DELETE FROM Players WHERE gameID='agree' OR gameID='disagree'";
+session_start();
 
- if ($conn->query($sql) === TRUE) {
-   echo "Record deleted successfully";
- } else {
-   echo "Error deleting record: " . $conn->error;
- }
- 
- $conn->close();
- header("location:../resultPage.php");
+ if (isset($_SESSION['gameID'])){
+    $gameID = $_SESSION['gameID'];
+} else {
+    header("Location:index.php?error=noGameID");
+    exit();
+}
+
+if (isset($_SESSION['uid'])){
+    $username = $_SESSION['uid'];
+} else {
+    header("Location:index.php?error=noUid");
+    exit();
+}
+
+$no = "no";
+$sql = "UPDATE Players SET IsVoted=? WHERE gameID=?";
+$stmt = $conn->prepare($sql); 
+$stmt->bind_param("ss", $no, $gameID);
+$stmt->execute();
+
+header("location:../resultPage.php");
 exit();
-
 

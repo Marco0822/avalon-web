@@ -1,34 +1,36 @@
-<?php
 
-
-
-
- //If back(to index) button is pressed
- if(array_key_exists('backBtn',$_POST)){
-    header("Location:index.php");
-    echo "pressed back button";
-    exit();
- }
-
-
-?>
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Game Page</title>
+    <title>Just Avalon</title>
+    <link rel="stylesheet" href="styles/createPageStyle.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-<form method="post">
-    <input id="game-ID" type="text" placeholder="Game ID:"><br>
-    <input id="uid" type="text" placeholder="Username:"><br>
-    <button type="button" id="createGameBtn">Create Game</button>
+<script>
+    function back() {
+        window.location.href = "index.php";
+    }
+
+</script>
+
+<form method="post" class="form">
+    <input class="inputs" id="game-ID" type="text" placeholder="Game ID:"><br>
+    <input class="inputs" id="uid" type="text" placeholder="Username:"><br>
+
+    <div class="btn-form">
+        <!--back button-->
+        <button type="button" class="button" onclick="back()">Back</button>
+
+        <button type="button" class="button" id="createGameBtn">Create Game</button>  
+    </div>
     
-    <!--back button-->
-    <input type="submit" name="backBtn"
-    class="button" value="Back"/> 
+    
 </form>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" 
@@ -76,7 +78,7 @@
     
 </script>
 
-<p id="response">adsds</p>
+
 
 </body>
 </html>

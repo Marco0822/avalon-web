@@ -44,10 +44,10 @@ if (isset($_POST['charArray'])){
         }
         
 
-        echo "good, same mumber";
+        echo "The characters have been changed!";
 
     } else {
-        echo "bad, different numbers";
+        echo "The number of Characters you selected doesn't match the number of Players!";
     }
 
    
