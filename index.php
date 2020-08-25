@@ -16,7 +16,7 @@ include_once("phpstuff/connectDB.php");
 $createSql = "CREATE TABLE IF NOT EXISTS Players (
                 id INT(11) PRIMARY KEY AUTO_INCREMENT,
                 gameID VARCHAR(30),
-                Username VARCHAR(30),
+                Username VARCHAR(100),
                 IdentityNo VARCHAR(30),
                 IsVoted VARCHAR(20)
                 )";
@@ -146,10 +146,28 @@ if (isset($_POST['createGame'])){
     
         // $datas array will contain all rows with the same gameID
         $datas = array();
+        $noOfPlayers = 5;
+        $threeDArray = array (
+            array(2,3,2,3,3),
+            array(2,3,4,3,4),
+            array(2,3,3,"4*",4),
+            array(3,4,4,"5*",5),
+            array(3,4,4,"5*",5),
+            array(3,4,4,"5*",5)
+          );
+        $arrayUsing = [2,3,2,3,3];
 
         //There's data in the database
         if (mysqli_num_rows($result) > 0){ 
+            $noOfPlayers = mysqli_num_rows($result);
 
+            //Even if players less than five, make it seem like it's five
+            //So that the buttons showing the players need for each mission
+            //would work properly
+            if (mysqli_num_rows($result) < 5){ 
+                $noOfPlayers = 5;
+            }
+            $arrayUsing = $threeDArray[$noOfPlayers-5];
             //still havin rows to fetch
             while ($row = mysqli_fetch_assoc($result)){ 
                 $datas[] = $row;
@@ -176,11 +194,27 @@ if (isset($_POST['createGame'])){
         $noOfVotes = "No votes yet!";
     }
 
+    //Get players for $playersInEveryMission
+    $playersInEveryMission = [];
+    $resultsInEveryMission = [];
+    $noToBeAdded = ["zero_gibberish", "_one", "_two", "_three", "_four", "_five"];
 
 
-    //if vote btn is pressed
-    
-    
+    for ($x = 1; $x < 6; $x++) {
+        $gameIDPlusNo = $gameID;
+        $gameIDPlusNo .= $noToBeAdded[$x];
+        $sql = "SELECT * FROM Players WHERE gameID=?"; 
+        $stmt = $conn->prepare($sql); 
+        $stmt->bind_param("s", $gameIDPlusNo);
+        $stmt->execute();
+        $result = $stmt->get_result(); // get the mysqli result
+
+        $row = mysqli_fetch_array($result, MYSQLI_BOTH);
+        array_push($playersInEveryMission, $row["Username"]);
+        array_push($resultsInEveryMission, $row["IdentityNo"]);
+
+    }
+   
 
 
     //If log out button is pressed
@@ -386,6 +420,45 @@ function labelPlayerBtn($buttonNo){
 
     </div>
 
+    <div class="map-div">
+        <div class="mission-div" id="mission-one">
+            <p class="mission-info" id="mission-info-1"></p>
+            <button id="button-1"><?php
+                echo $arrayUsing[0];
+            ?></button>
+        </div>
+        <div class="mission-div" id="mission-two">
+            <p class="mission-info" id="mission-info-2"></p>
+            <button id="button-2"><?php
+                echo $arrayUsing[1];
+            ?></button>
+        </div>
+        <div class="mission-div" id="mission-three">
+            <p class="mission-info" id="mission-info-3"></p>
+            <button id="button-3"><?php
+                echo $arrayUsing[2];
+            ?></button>
+        </div>
+        <div class="mission-div" id="mission-four">
+            <p class="mission-info" id="mission-info-4"></p>
+            <button id="button-4"><?php
+                echo $arrayUsing[3];
+            ?></button>
+        </div>
+        <div class="mission-div" id="mission-five">
+            <p class="mission-info" id="mission-info-5"></p>
+            <button id="button-5"><?php
+                echo $arrayUsing[4];
+            ?></button>
+        </div>
+        <div class="mission-div" id="info-editor">
+            <input id="missionToEdit" placeholder="Mission No:" type="number">
+            <input id="missionPlayers" placeholder="Players:" type="text">
+            <input id="missionResult" placeholder="Result:" type="text">
+            <button id="go-btn">Go</button>
+        </div>
+    </div>
+
 
 
 </div>
@@ -409,10 +482,63 @@ if (isset($_SESSION['logOutIsVisible'])){
 </script>
 
 <script type="text/javascript">
+    $(document).ready(function() { 
+        console.log("ready");
+        // When button with id 'login' is clicked
+        $("#go-btn").on('click', function(){
+            //Get input stuff with id #email
+            var missionToEdit= $("#missionToEdit").val();
+            var missionPlayers= $("#missionPlayers").val();
+            var missionResult= $("#missionResult").val();
+            var missionToEditInt = parseInt(missionToEdit);
+
+            var gameID = "<?php echo $gameID?>";
+
+            //if empty fields
+            if (missionToEdit == ""){
+                alert('Empty Field(s)! Check your inputs.');
+
+            } else if (gameID == "not yet set"){
+                alert('Game ID has not been set');
+            } else if ((missionToEdit < 1) || (missionToEdit > 5)) {
+                alert('Mission Number must be 1-5');
+            } else if (!(Number.isInteger(missionToEditInt))){
+                alert('Mission Number must be an interger');
+            } else {
+                $.ajax({
+                        url: 'editMissionInfo.php',
+                        method: 'POST',
+                        dataType: 'text',
+                        data: {
+                            mission: 1,
+                            missionToEdit: missionToEdit,
+                            missionPlayers: missionPlayers,
+                            missionResult: missionResult,
+                            gameID: gameID
+                        }
+                        
+                }).done(function(returnedData){
+                    console.log(returnedData);
+                    if(returnedData == "not voted yet, can vote now"){
+                        //alert(returnedData);
+                        window.location.href="votePage.php"; 
+                    } else {
+                        alert(returnedData);
+                    }
+                })
+            }
+
+        })
+    });
+</script>
+
+
+
+<script type="text/javascript">
     //document.ready means the page is ready
         //meaning all elements of the html page is loaded
         $(document).ready(function() { 
-
+            console.log("ready again");
             //Show or hide log out button and createGame and joinPage button
             
             logOutIsVisible = "<?php echo $logOutIsVisible?>";
@@ -466,8 +592,45 @@ if (isset($_SESSION['logOutIsVisible'])){
 
             })
         });
+
     
 </script>
+
+<script type="text/javascript">
+
+$(document).ready(function() { 
+        console.log("ready as");
+        var playersInEveryMission = <?php echo json_encode($playersInEveryMission); ?>;
+        var resultsInEveryMission = <?php echo json_encode($resultsInEveryMission); ?>;
+        console.log(playersInEveryMission);
+        console.log(resultsInEveryMission);
+
+        
+        document.getElementById("mission-info-1").textContent = "Players: " + playersInEveryMission[0];
+        document.getElementById("mission-info-2").textContent = "Players: " + playersInEveryMission[1];
+        document.getElementById("mission-info-3").textContent = "Players: " + playersInEveryMission[2];
+        document.getElementById("mission-info-4").textContent = "Players: " + playersInEveryMission[3];
+        document.getElementById("mission-info-5").textContent = "Players: " + playersInEveryMission[4];
+
+        for ($x = 0; $x < 5; $x++) {
+            var plus1 = $x + 1;
+            var buttonID = "button-" + plus1;
+            if (resultsInEveryMission[$x] == "success"){
+                document.getElementById(buttonID).style.background='rgb(65, 87, 175)';
+            } else if (resultsInEveryMission[$x] == "failed"){
+                document.getElementById(buttonID).style.background='#F65058FF';
+            } else {
+                document.getElementById(buttonID).style.background='grey';
+            }
+        }
+        // When button with id 'login' is clicked
+    });
+
+</script>
+
+
+
+
 
 
 </body>

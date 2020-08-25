@@ -58,6 +58,26 @@ if (isset($_POST['createGame'])){
         //log Out Btn should be visible after created game successfully
         $_SESSION['logOutIsVisible'] = true;
 
+
+        //gameID + "_one"/"_two" etc. also has to be added 
+
+        $gameIDPlusNo = $gameID;
+        $noToBeAdded = ["_one", "_two", "_three", "_four", "_five"];
+
+        for ($x = 0; $x < 5; $x++) {
+            $gameIDPlusNo .= $noToBeAdded[$x];
+            if (!($stmt = $conn->prepare("INSERT INTO Players(gameID) VALUES (?)"))) {
+                echo ("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+            }
+            if (!$stmt->bind_param("s", $gameIDPlusNo)) {
+                echo ("Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            if (!$stmt->execute()) {
+                echo ("Execute failed: (" . $stmt->errno . ") " . $stmt->error);
+            }
+            $gameIDPlusNo = $gameID;
+        }
+
         $stmt->close();
         echo "Inserted data successfully!";
     }
