@@ -191,7 +191,7 @@ if (isset($_POST['createGame'])){
     if (mysqli_num_rows($result) > 0){ //There's data in the database
         $noOfVotes = mysqli_num_rows($result);
     } else {
-        $noOfVotes = "No votes yet!";
+        $noOfVotes = "0";
     }
 
     //Get players for $playersInEveryMission
@@ -210,9 +210,18 @@ if (isset($_POST['createGame'])){
         $result = $stmt->get_result(); // get the mysqli result
 
         $row = mysqli_fetch_array($result, MYSQLI_BOTH);
-        array_push($playersInEveryMission, $row["Username"]);
-        array_push($resultsInEveryMission, $row["IdentityNo"]);
-
+        
+        if (mysqli_num_rows($result) > 0){ 
+            if ($row["Username"] !== null) {
+                array_push($playersInEveryMission, $row["Username"]);
+            }
+            if ($row["IdentityNo"] !== null) {
+                array_push($resultsInEveryMission, $row["IdentityNo"]);
+            }
+        }
+        
+        
+    
     }
    
 
@@ -274,7 +283,7 @@ function labelPlayerBtn($buttonNo){
             if ($yourChar == "merlin" or $yourChar == "mushroom"){
                 echo "(merlin)";
             } else {
-                echo "(unknown)";
+                echo "(?)";
             }
         }
 
@@ -282,7 +291,7 @@ function labelPlayerBtn($buttonNo){
             if ($yourChar == "mushroom"){
                 echo "(mushroom)";
             } else {
-                echo "(unknown)";
+                echo "(?)";
             }
         }
 
@@ -290,7 +299,7 @@ function labelPlayerBtn($buttonNo){
             if ($playerUsername == $username){
                 echo "(villager)";  
             } else {
-                echo "(unknown)";
+                echo "(?)";
             }
             
         }
@@ -298,7 +307,7 @@ function labelPlayerBtn($buttonNo){
             if ($yourChar == "minion" or $yourChar == "assassin" or $yourChar == "merlin"){
                 echo "(minion)";
             } else {
-                echo "(unknown)";
+                echo "(?)";
             }
         }
 
@@ -306,7 +315,7 @@ function labelPlayerBtn($buttonNo){
             if ($yourChar == "minion" or $yourChar == "assassin" or $yourChar == "merlin"){
                 echo "(assassin)";
             } else {
-                echo "(unknown)";
+                echo "(?)";
             }
         }
 
@@ -518,13 +527,7 @@ if (isset($_SESSION['logOutIsVisible'])){
                         }
                         
                 }).done(function(returnedData){
-                    console.log(returnedData);
-                    if(returnedData == "not voted yet, can vote now"){
-                        //alert(returnedData);
-                        window.location.href="votePage.php"; 
-                    } else {
-                        alert(returnedData);
-                    }
+                    location.reload();
                 })
             }
 
@@ -605,12 +608,18 @@ $(document).ready(function() {
         console.log(playersInEveryMission);
         console.log(resultsInEveryMission);
 
+        for (i = 0; i < 5; i++) { 
+            if (playersInEveryMission[i] == null) {
+                playersInEveryMission[i] = "";
+            }
+            
         
-        document.getElementById("mission-info-1").textContent = "Players: " + playersInEveryMission[0];
-        document.getElementById("mission-info-2").textContent = "Players: " + playersInEveryMission[1];
-        document.getElementById("mission-info-3").textContent = "Players: " + playersInEveryMission[2];
-        document.getElementById("mission-info-4").textContent = "Players: " + playersInEveryMission[3];
-        document.getElementById("mission-info-5").textContent = "Players: " + playersInEveryMission[4];
+        }
+        document.getElementById("mission-info-1").textContent = "Mission Players: " + playersInEveryMission[0];
+        document.getElementById("mission-info-2").textContent = "Mission Players: " + playersInEveryMission[1];
+        document.getElementById("mission-info-3").textContent = "Mission Players: " + playersInEveryMission[2];
+        document.getElementById("mission-info-4").textContent = "Mission Players: " + playersInEveryMission[3];
+        document.getElementById("mission-info-5").textContent = "Mission Players: " + playersInEveryMission[4];;
 
         for ($x = 0; $x < 5; $x++) {
             var plus1 = $x + 1;
@@ -629,6 +638,157 @@ $(document).ready(function() {
 </script>
 
 
+
+<script>
+
+function safeToString(x) {
+  switch (typeof x) {
+    case 'object':
+      return 'object';
+    case 'function':
+      return 'function';
+    default:
+      return x + '';
+  }
+}
+
+
+//Refresh page code
+
+var JSgameID = "<?php echo $gameID?>";
+var JSusername= "<?php echo $username?>";
+
+window.setInterval(function(){
+    $.ajax({
+        url: 'refresh.php',
+        method: 'POST',
+        dataType: 'text',
+        data: {
+            refresh: 1,
+            PHPgameID: JSgameID, 
+            PHPusername: JSusername
+        }
+            
+    }).done(function(returnedData){
+        //alert(returnedData);
+        
+
+        var fields = returnedData.split("||");
+        var playersString = fields[0];
+        var charsString = fields[1];
+        var yourCharString = fields[2];
+        var missionPlayersString = fields[3];
+        var missionResultString = fields[4];
+        
+        
+        var playersArray = playersString.split("//");
+        var charsArray = charsString.split("//");
+
+        var missionPlayersArray = missionPlayersString.split("//");
+        missionPlayersArray.pop(); //Delete last element because it's extra
+        var missionResultArray = missionResultString.split("//");
+        missionResultArray.pop(); //Delete last element because it's extra, 
+        // Trust yourself Marco !!!!
+
+        console.log(missionResultArray);
+
+        //alert(yourCharString);
+
+    //The first element of playersArray is the no. of votes
+        var noOfVotes= "Votes: ".concat(playersArray[0]);
+        document.getElementById('voteLabel').innerHTML = noOfVotes;
+
+        var i;
+        console.log(playersArray.length);
+        for (i = 1; i < (12 - 1); i++) { 
+            var player = playersArray[i];
+            var character = charsArray[i-1];
+
+            if (player == undefined) {
+                player = "";
+            } 
+            if ((character == undefined) || (character == "")) {
+                character = "";
+            } else {
+                character = character;
+            }
+
+            
+
+            if (character == "merlin"){
+                if ((yourCharString == "merlin") || (yourCharString == "mushroom")){
+                    character = "(merlin)";
+                } else {
+                    character = "(?)";
+                } 
+            }
+            if (character == "mushroom"){
+                if (yourCharString == "mushroom"){
+                    character = "(mushroom)";
+                } else {
+                    character = "(?)";
+                } 
+            }
+
+            if (character == "villager"){
+                if (player == "<?php echo $username?>"){
+                    character = "(villager)";
+                } else {
+                    character = "(?)";
+                } 
+            }
+
+            if (character == "minion"){
+                if ((yourCharString == "minion") || (yourCharString == "assassin") || (yourCharString == "merlin")){
+                    character = "(minion)";
+                } else {
+                    character = "(?)";
+                } 
+            }
+
+            if (character == "assassin"){
+                if ((yourCharString == "minion") || (yourCharString == "assassin") || (yourCharString == "merlin")){
+                    character = "(assassin)";
+                } else {
+                    character = "(?)";
+                } 
+            }
+
+            var playerLabelID = "player" + (i - 1);
+            document.getElementById(playerLabelID).innerHTML = player + character;
+        }
+
+        //Refresh map div
+
+        for (i = 0; i < 5; i++) { 
+            var missionPlayers = missionPlayersArray[i];
+            var missionLabelID = "mission-info-" + (i + 1);
+            document.getElementById(missionLabelID).innerHTML = "Mission Players: " + missionPlayers;
+
+            var missionResult = missionResultArray[i];
+            var missionButtonID = "button-" + (i + 1);
+
+            if (missionResult == "success") {
+                document.getElementById(missionButtonID).style.background='rgb(65, 87, 175)';
+            } else if (missionResult == "failed") {
+                document.getElementById(missionButtonID).style.background='#F65058FF';
+            } else {
+                document.getElementById(missionButtonID).style.background='grey';
+            }
+            
+
+
+        }
+        
+
+
+    })
+
+
+}, 5000);
+
+
+</script>
 
 
 
